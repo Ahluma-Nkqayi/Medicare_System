@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Manage Prescriptions</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/admin/prescriptions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Add Prescription Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Prescription</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    <div class="form-group">
+                        <label for="addPatient">Patient: <span class="required">*</span></label>
+                        <select id="addPatient" required>
+                            <option value="">Select Patient</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addDoctor">Doctor: <span class="required">*</span></label>
+                        <select id="addDoctor" required>
+                            <option value="">Select Doctor</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addMedication">Medication Name: <span class="required">*</span></label>
+                        <input type="text" id="addMedication" required placeholder="Enter medication name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addDosage">Dosage: <span class="required">*</span></label>
+                        <input type="text" id="addDosage" required placeholder="e.g., 500mg">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addFrequency">Frequency: <span class="required">*</span></label>
+                        <input type="text" id="addFrequency" required placeholder="e.g., Twice daily">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addDuration">Duration:</label>
+                        <input type="text" id="addDuration" placeholder="e.g., 7 days">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addPrescribedDate">Prescribed Date: <span class="required">*</span></label>
+                        <input type="date" id="addPrescribedDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addStatus">Status:</label>
+                        <select id="addStatus">
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addInstructions">Instructions:</label>
+                        <textarea id="addInstructions" placeholder="Enter special instructions..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="add-btn">Add Prescription</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Prescription Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Prescription</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editPrescriptionId">
+
+                    <div class="form-group">
+                        <label for="editPatient">Patient: <span class="required">*</span></label>
+                        <select id="editPatient" required>
+                            <option value="">Select Patient</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editDoctor">Doctor: <span class="required">*</span></label>
+                        <select id="editDoctor" required>
+                            <option value="">Select Doctor</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editMedication">Medication Name: <span class="required">*</span></label>
+                        <input type="text" id="editMedication" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editDosage">Dosage: <span class="required">*</span></label>
+                        <input type="text" id="editDosage" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editFrequency">Frequency: <span class="required">*</span></label>
+                        <input type="text" id="editFrequency" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editDuration">Duration:</label>
+                        <input type="text" id="editDuration">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editPrescribedDate">Prescribed Date: <span class="required">*</span></label>
+                        <input type="date" id="editPrescribedDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editStatus">Status:</label>
+                        <select id="editStatus">
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editInstructions">Instructions:</label>
+                        <textarea id="editInstructions"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Manage Prescriptions</h1>
+            <button class="add-prescription-btn" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> Add Prescription
+            </button>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by patient, doctor, or medication...">
+            </div>
+            <div class="filter-controls">
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Prescriptions Table -->
+        <div class="table-container">
+            <table class="prescriptions-table" id="prescriptionsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Duration</th>
+                        <th>Prescribed Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="prescriptionsTableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../../assets/js/admin/sidebar.js"></script>
+    <script src="../../assets/js/admin/prescriptions.js"></script>
+</body>
+</html>

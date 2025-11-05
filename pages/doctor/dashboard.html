@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Doctor Dashboard</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/doctor/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="stats-overview-grid">
+            <div class="stat-box">
+                <div class="stat-number" id="scheduled-count">0</div>
+                <div class="stat-label">Scheduled</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="completed-count">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="inprogress-count">0</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="waiting-count">0</div>
+                <div class="stat-label">Waiting</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Upcoming Appointments <a href="/doctor/appointments" style="color: #1a6fc4; text-decoration: none; font-size: 14px;">View All</a></h3>
+                <div id="upcoming-appointments">
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Mary Brown</strong>
+                            <p>20 May 2025, 10:00 am</p>
+                        </div>
+                        <a href="appointments.html">Details <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Abiuma Khazari</strong>
+                            <p>28 May 2025, 09:00 am</p>
+                        </div>
+                        <a href="appointments.html">Details <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Silke Rasmus</strong>
+                            <p>30 May 2025, 02:00 pm</p>
+                        </div>
+                        <a href="appointments.html">Details <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent Patients <a href="/doctor/medical-records" style="color: #1a6fc4; text-decoration: none; font-size: 14px;">View All</a></h3>
+                <div id="recent-patients">
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Mary Brown</strong>
+                            <p>Last visit: 10 Mar 2025</p>
+                        </div>
+                        <a href="medical-records.html">Record <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Robert Johnson</strong>
+                            <p>Last visit: 15 Aug 2025</p>
+                        </div>
+                        <a href="medical-records.html">Record <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Sarah Williams</strong>
+                            <p>Last visit: 14 Aug 2025</p>
+                        </div>
+                        <a href="medical-records.html">Record <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="appointment-item">
+                        <div>
+                            <strong>Michael Chen</strong>
+                            <p>Last visit: 13 Aug 2025</p>
+                        </div>
+                        <a href="medical-records.html">Record <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="full-width-card">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions">
+                <div class="action-card" onclick="navigateToPage('/doctor/appointments')">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Appointments</h3>
+                    <p>View and manage patient appointments</p>
+                </div>
+                <div class="action-card" onclick="navigateToPage('/doctor/medical-records')">
+                    <i class="fas fa-file-medical"></i>
+                    <h3>Medical Records</h3>
+                    <p>Access patient medical history and records</p>
+                </div>
+                <div class="action-card" onclick="navigateToPage('/doctor/schedule')">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Schedule</h3>
+                    <p>Manage your availability and time slots</p>
+                </div>
+                <div class="action-card" onclick="navigateToPage('/doctor/prescriptions')">
+                    <i class="fas fa-prescription"></i>
+                    <h3>Prescriptions</h3>
+                    <p>Write and manage patient prescriptions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/shared/sidebar.js"></script>
+    <script>
+        // Check if user is logged in (client-side check)
+        function checkAuthentication() {
+            // Since we're using session-based auth, we'll check with the server
+            return true; // Let the server handle authentication
+        }
+
+        // Function to fetch dashboard data from server
+        async function fetchDashboardData() {
+            try {
+                console.log('Fetching dashboard data...');
+                const response = await fetch('/api/doctor/dashboard', {
+                    method: 'GET',
+                    credentials: 'include', // Include session cookies
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Dashboard response status:', response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Dashboard data received:', data);
+                    updateDashboard(data);
+                } else if (response.status === 401) {
+                    // Session expired or invalid
+                    console.log('Unauthorized - redirecting to login');
+                    window.location.href = '/login';
+                } else {
+                    console.error('Failed to fetch dashboard data:', response.statusText);
+                    showError('Failed to load dashboard data');
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        // Function to update the dashboard with real data
+        function updateDashboard(data) {
+            if (data.doctorInfo) {
+                sessionStorage.setItem('doctorInfo', JSON.stringify(data.doctorInfo));
+                // Refresh sidebar if the function exists
+                if (window.refreshDoctorSidebar) {
+                    window.refreshDoctorSidebar();
+                }
+            }
+
+            // Update today's appointments
+            if (data.todayAppointments) {
+                const scheduledEl = document.getElementById('scheduled-count');
+                const completedEl = document.getElementById('completed-count');
+                const inProgressEl = document.getElementById('inprogress-count');
+                const waitingEl = document.getElementById('waiting-count');
+
+                if (scheduledEl) scheduledEl.textContent = data.todayAppointments.scheduled || 0;
+                if (completedEl) completedEl.textContent = data.todayAppointments.completed || 0;
+                if (inProgressEl) inProgressEl.textContent = data.todayAppointments.inProgress || 0;
+                if (waitingEl) waitingEl.textContent = data.todayAppointments.waiting || 0;
+
+                console.log('Updated appointment counts:', {
+                    scheduled: data.todayAppointments.scheduled,
+                    completed: data.todayAppointments.completed,
+                    inProgress: data.todayAppointments.inProgress,
+                    waiting: data.todayAppointments.waiting
+                });
+            } else {
+                console.warn('No todayAppointments data received');
+            }
+            
+            // Update monthly overview
+            if (data.monthlyOverview) {
+                const totalPatientsEl = document.getElementById('total-patients');
+                const completedVisitsEl = document.getElementById('completed-visits');
+                const upcomingVisitsEl = document.getElementById('upcoming-visits');
+                const healthScoreEl = document.getElementById('health-score');
+
+                if (totalPatientsEl) totalPatientsEl.textContent = data.monthlyOverview.totalPatients || 0;
+                if (completedVisitsEl) completedVisitsEl.textContent = data.monthlyOverview.completedVisits || 0;
+                if (upcomingVisitsEl) upcomingVisitsEl.textContent = data.monthlyOverview.upcoming || 0;
+                if (healthScoreEl) healthScoreEl.textContent = data.monthlyOverview.healthScore || 'N/A';
+            }
+            
+            // Update upcoming appointments
+            if (data.upcomingAppointments && data.upcomingAppointments.length > 0) {
+                updateUpcomingAppointments(data.upcomingAppointments);
+            }
+            
+            // Update recent patients
+            if (data.recentPatients && data.recentPatients.length > 0) {
+                updateRecentPatients(data.recentPatients);
+            }
+        }
+
+        // Function to update upcoming appointments
+        function updateUpcomingAppointments(appointments) {
+            const container = document.getElementById('upcoming-appointments');
+            container.innerHTML = '';
+
+            if (appointments.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No upcoming appointments</p>';
+                return;
+            }
+
+            appointments.slice(0, 3).forEach(appt => {
+                const appointmentItem = document.createElement('div');
+                appointmentItem.className = 'appointment-item';
+                appointmentItem.innerHTML = `
+                    <div>
+                        <strong>${appt.first_name} ${appt.last_name}</strong>
+                        <p>${formatDate(appt.booking_date)}, ${formatTime(appt.booking_time)}</p>
+                    </div>
+                    <a href="/doctor/appointments?id=${appt.booking_id}">Details <i class="fas fa-chevron-right"></i></a>
+                `;
+                container.appendChild(appointmentItem);
+            });
+        }
+
+        // Function to update recent patients
+        function updateRecentPatients(patients) {
+            const container = document.getElementById('recent-patients');
+            container.innerHTML = '';
+
+            if (patients.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No recent patients</p>';
+                return;
+            }
+
+            patients.slice(0, 4).forEach(patient => {
+                const patientItem = document.createElement('div');
+                patientItem.className = 'appointment-item';
+                patientItem.innerHTML = `
+                    <div>
+                        <strong>${patient.first_name} ${patient.last_name}</strong>
+                        <p>Last visit: ${formatDate(patient.last_visit)}</p>
+                    </div>
+                    <a href="/doctor/medical-records">Record <i class="fas fa-chevron-right"></i></a>
+                `;
+                container.appendChild(patientItem);
+            });
+        }
+
+        // Helper function to format dates
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Helper function to format time
+        function formatTime(timeString) {
+            if (!timeString) return '';
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        // Function to show error messages
+        function showError(message) {
+            // Create a simple error notification
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+                max-width: 300px;
+            `;
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        // Navigation function
+        function navigateToPage(page) {
+            window.location.href = page;
+        }
+
+        // Update current date
+        function updateDate() {
+            // Element doesn't exist in current layout, so skip
+            // const now = new Date();
+            // const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            // document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Update doctor info from server session
+        async function updateDoctorInfo() {
+            try {
+                // The doctor info should come from the dashboard API response
+                // We'll update it when we get the dashboard data
+            } catch (error) {
+                console.log('Could not update doctor info');
+            }
+        }
+
+        // Add navigation event listeners
+        function setupNavigation() {
+            document.querySelectorAll('.nav-tabs li').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.nav-tabs li').forEach(t => t.classList.remove('active'));
+                    
+                    // Don't add active class if it has a link
+                    if (!this.querySelector('a')) {
+                        this.classList.add('active');
+                    }
+                    
+                    // Handle navigation
+                    const text = this.textContent.trim();
+                    if (text === 'Dashboard') {
+                        // Stay on current page
+                        return;
+                    } else if (text === 'Prescriptions' || text === 'Messages') {
+                        e.preventDefault();
+                        alert(`${text} page is under development`);
+                    }
+                });
+            });
+        }
+
+        // Initialize the dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize page
+            updateDate();
+            setupNavigation();
+            
+            // Fetch real data from server (server will handle authentication)
+            fetchDashboardData();
+        });
+    </script>
+
+</body>
+</html>

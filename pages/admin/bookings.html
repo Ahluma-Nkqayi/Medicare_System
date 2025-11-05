@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Manage Bookings</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/admin/bookings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Add Booking Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Booking</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    <div class="form-group">
+                        <label for="addPatient">Patient:</label>
+                        <select id="addPatient" required>
+                            <option value="">Select Patient</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="addDoctor">Doctor:</label>
+                        <select id="addDoctor" required>
+                            <option value="">Select Doctor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="addBookingDate">Booking Date:</label>
+                        <input type="date" id="addBookingDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="addBookingTime">Booking Time:</label>
+                        <input type="time" id="addBookingTime" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="addDuration">Duration (minutes):</label>
+                        <select id="addDuration" required>
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="addReason">Reason for Visit:</label>
+                        <textarea id="addReason" required placeholder="Enter reason for visit..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="add-btn">Add Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Booking Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Booking</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="editPatient">Patient:</label>
+                        <select id="editPatient" required>
+                            <option value="">Select Patient</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDoctor">Doctor:</label>
+                        <select id="editDoctor" required>
+                            <option value="">Select Doctor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editBookingDate">Booking Date:</label>
+                        <input type="date" id="editBookingDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="editBookingTime">Booking Time:</label>
+                        <input type="time" id="editBookingTime" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="editDuration">Duration (minutes):</label>
+                        <select id="editDuration" required>
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editReason">Reason for Visit:</label>
+                        <textarea id="editReason" required placeholder="Enter reason for visit..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Status:</label>
+                        <select id="editStatus" required>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Manage Bookings</h1>
+            <button class="add-booking-btn" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> Add Booking
+            </button>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by patient or doctor name...">
+            </div>
+            <div class="filter-controls">
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="table-container">
+            <table class="bookings-table" id="bookingsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsTableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="bookings-container" style="display: none;"></div>
+    </div>
+
+    <script src="../../assets/js/admin/sidebar.js"></script>
+    <script src="../../assets/js/admin/bookings.js"></script>
+</body>
+</html>

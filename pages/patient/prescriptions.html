@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - My Prescriptions</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/patient/prescriptions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+
+    <div class="main-content">
+        <div class="prescriptions-container">
+            <div class="prescriptions-list" id="prescriptions-list">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Loading prescriptions...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/patient/sidebar.js"></script>
+    <script>
+        async function fetchPrescriptions() {
+            try {
+                const response = await fetch('/api/patient/prescriptions', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const prescriptions = await response.json();
+                    displayPrescriptions(prescriptions);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else {
+                    showError('Failed to load prescriptions');
+                }
+            } catch (error) {
+                console.error('Error fetching prescriptions:', error);
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        function displayPrescriptions(prescriptions) {
+            const container = document.getElementById('prescriptions-list');
+
+            if (prescriptions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-prescription"></i>
+                        <h3>No Prescriptions Found</h3>
+                        <p>You don't have any prescriptions yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            prescriptions.forEach(rx => {
+                const card = document.createElement('div');
+                card.className = 'prescription-card';
+                card.innerHTML = `
+                    <div class="prescription-header">
+                        <div class="medication-info">
+                            <h3>${rx.medication_name}</h3>
+                            <p>Prescribed on ${formatDate(rx.prescribed_date)}</p>
+                        </div>
+                        <span class="status-badge status-${rx.status.toLowerCase()}">
+                            ${rx.status}
+                        </span>
+                    </div>
+
+                    <div class="prescription-details">
+                        <div class="detail-box">
+                            <label><i class="fas fa-pills"></i> Dosage</label>
+                            <div class="value">${rx.dosage}</div>
+                        </div>
+                        <div class="detail-box">
+                            <label><i class="fas fa-clock"></i> Frequency</label>
+                            <div class="value">${rx.frequency}</div>
+                        </div>
+                        ${rx.duration ? `
+                        <div class="detail-box">
+                            <label><i class="fas fa-calendar-alt"></i> Duration</label>
+                            <div class="value">${rx.duration}</div>
+                        </div>
+                        ` : ''}
+                        ${rx.quantity ? `
+                        <div class="detail-box">
+                            <label><i class="fas fa-boxes"></i> Quantity</label>
+                            <div class="value">${rx.quantity}</div>
+                        </div>
+                        ` : ''}
+                        ${rx.refills !== null && rx.refills !== undefined ? `
+                        <div class="detail-box">
+                            <label><i class="fas fa-redo"></i> Refills</label>
+                            <div class="value">${rx.refills}</div>
+                        </div>
+                        ` : ''}
+                        ${rx.start_date ? `
+                        <div class="detail-box">
+                            <label><i class="fas fa-calendar-check"></i> Start Date</label>
+                            <div class="value">${formatDate(rx.start_date)}</div>
+                        </div>
+                        ` : ''}
+                        ${rx.end_date ? `
+                        <div class="detail-box">
+                            <label><i class="fas fa-calendar-times"></i> End Date</label>
+                            <div class="value">${formatDate(rx.end_date)}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${rx.instructions ? `
+                    <div class="prescription-instructions">
+                        <h4><i class="fas fa-info-circle"></i> Instructions</h4>
+                        <p>${rx.instructions}</p>
+                    </div>
+                    ` : ''}
+
+                    ${rx.notes ? `
+                    <div class="prescription-notes">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Important Notes</strong>
+                        <p>${rx.notes}</p>
+                    </div>
+                    ` : ''}
+
+                    <div class="prescription-footer">
+                        <div class="doctor-info">
+                            <i class="fas fa-user-md"></i>
+                            <div class="doctor-details">
+                                <h5>${rx.prescribed_by}</h5>
+                                <p>${rx.specialization || 'General Practice'}</p>
+                            </div>
+                        </div>
+                        ${rx.appointment_date ? `
+                        <div class="appointment-info">
+                            <i class="fas fa-calendar"></i>
+                            <span>Appointment: ${formatDate(rx.appointment_date)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+                max-width: 300px;
+            `;
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchPrescriptions();
+        });
+    </script>
+</body>
+</html>

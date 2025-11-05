@@ -1,0 +1,285 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+.main-content {
+    margin-left: 260px;
+    padding: 30px;
+    padding-bottom: 100px;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+.page-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e8ecef;
+}
+
+.page-header h1 {
+    color: #333;
+    font-weight: 600;
+    font-size: 28px;
+}
+
+.records-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+}
+
+.record-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.record-section h2 {
+    color: #333;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e8ecef;
+}
+
+.record-section h2 i {
+    color: #1a6fc4;
+    font-size: 22px;
+}
+
+.personal-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #1a6fc4;
+}
+
+.info-item label {
+    display: block;
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item span {
+    display: block;
+    color: #333;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.conditions-list,
+.allergies-list,
+.medications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.condition-card,
+.allergy-card,
+.medication-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 5px solid #1a6fc4;
+    transition: all 0.3s ease;
+}
+
+.condition-card:hover,
+.allergy-card:hover,
+.medication-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.card-header h3 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.card-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-inactive {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.badge-severe,
+.badge-critical {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-high {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-moderate,
+.badge-mild {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-row label {
+    color: #666;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-row span {
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notes-section {
+    margin-top: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.notes-section strong {
+    color: #666;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.notes-section p {
+    color: #333;
+    margin-top: 8px;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.allergy-severity-critical,
+.allergy-severity-severe {
+    border-left-color: #dc3545;
+}
+
+.allergy-severity-high {
+    border-left-color: #ffc107;
+}
+
+.allergy-severity-moderate {
+    border-left-color: #17a2b8;
+}
+
+.allergy-severity-mild {
+    border-left-color: #28a745;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 3.5em;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+.empty-state p {
+    font-size: 15px;
+    color: #999;
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 220px;
+    }
+
+    .personal-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 80px 20px 100px;
+    }
+
+    .personal-info {
+        grid-template-columns: 1fr;
+    }
+
+    .card-details {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}

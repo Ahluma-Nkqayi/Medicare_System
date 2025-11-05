@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Manage Users</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/admin/users.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Add User Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addForm">
+                    <div class="form-group">
+                        <label for="addUserType">User Type:</label>
+                        <select id="addUserType" required>
+                            <option value="">Select User Type</option>
+                            <option value="patient">Patient</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addUsername">Username:</label>
+                        <input type="text" id="addUsername" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addPassword">Password:</label>
+                        <input type="password" id="addPassword" required />
+                    </div>
+
+                    <!-- Common fields -->
+                    <div id="commonFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="addFirstName">First Name:</label>
+                            <input type="text" id="addFirstName" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addLastName">Last Name:</label>
+                            <input type="text" id="addLastName" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addDOB">Date of Birth:</label>
+                            <input type="date" id="addDOB" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addGender">Gender:</label>
+                            <select id="addGender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addIDNumber">Identification Number:</label>
+                            <input type="text" id="addIDNumber" />
+                        </div>
+                    </div>
+
+                    <!-- Patient-specific fields -->
+                    <div id="patientFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="addEmail">Email:</label>
+                            <input type="email" id="addEmail" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addPhone">Phone Number:</label>
+                            <input type="tel" id="addPhone" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addAddress">Address:</label>
+                            <textarea id="addAddress"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addEmergencyName">Emergency Contact Name:</label>
+                            <input type="text" id="addEmergencyName" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addEmergencyPhone">Emergency Contact Phone:</label>
+                            <input type="tel" id="addEmergencyPhone" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addBloodType">Blood Type:</label>
+                            <select id="addBloodType">
+                                <option value="">Select Blood Type</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Doctor-specific fields -->
+                    <div id="doctorFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="addSpecialization">Specialization:</label>
+                            <input type="text" id="addSpecialization" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addStatus">Status:</label>
+                            <select id="addStatus">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="add-btn">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editUserId" />
+                    <input type="hidden" id="editUserType" />
+
+                    <div class="form-group">
+                        <label for="editUsername">Username:</label>
+                        <input type="text" id="editUsername" disabled />
+                    </div>
+
+                    <!-- Common fields -->
+                    <div id="editCommonFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="editFirstName">First Name:</label>
+                            <input type="text" id="editFirstName" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editLastName">Last Name:</label>
+                            <input type="text" id="editLastName" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editDOB">Date of Birth:</label>
+                            <input type="date" id="editDOB" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editGender">Gender:</label>
+                            <select id="editGender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editIDNumber">Identification Number:</label>
+                            <input type="text" id="editIDNumber" />
+                        </div>
+                    </div>
+
+                    <!-- Patient-specific fields -->
+                    <div id="editPatientFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="editEmail">Email:</label>
+                            <input type="email" id="editEmail" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editPhone">Phone Number:</label>
+                            <input type="tel" id="editPhone" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAddress">Address:</label>
+                            <textarea id="editAddress"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEmergencyName">Emergency Contact Name:</label>
+                            <input type="text" id="editEmergencyName" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEmergencyPhone">Emergency Contact Phone:</label>
+                            <input type="tel" id="editEmergencyPhone" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editBloodType">Blood Type:</label>
+                            <select id="editBloodType">
+                                <option value="">Select Blood Type</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Doctor-specific fields -->
+                    <div id="editDoctorFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="editSpecialization">Specialization:</label>
+                            <input type="text" id="editSpecialization" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editStatus">Status:</label>
+                            <select id="editStatus">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Manage Users</h1>
+            <button class="add-user-btn" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> Add User
+            </button>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by name, username, or email...">
+            </div>
+            <div class="filter-controls">
+                <select id="userTypeFilter" class="filter-select">
+                    <option value="">All User Types</option>
+                    <option value="patient">Patients</option>
+                    <option value="doctor">Doctors</option>
+                    <option value="admin">Admins</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <table class="users-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Details</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../../assets/js/admin/sidebar.js"></script>
+    <script src="../../assets/js/admin/users.js"></script>
+</body>
+</html>

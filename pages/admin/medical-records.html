@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Medical Records</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/admin/medical-records.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Medical Records</h1>
+        </div>
+
+        <!-- Search Section -->
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by patient name...">
+            </div>
+        </div>
+
+        <!-- Patient List Table -->
+        <div class="table-container">
+            <table class="patients-table" id="patientsTable">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Patient Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Conditions</th>
+                        <th>Allergies</th>
+                        <th>Medications</th>
+                        <th>Reports</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsTableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Patient Medical Records Detail Modal -->
+    <div id="recordsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalPatientName">Patient Medical Records</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Patient Info Summary -->
+                <div class="patient-info-card">
+                    <div class="info-row">
+                        <span class="info-label">Patient ID:</span>
+                        <span id="patientId"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span id="patientEmail"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span id="patientPhone"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Date of Birth:</span>
+                        <span id="patientDOB"></span>
+                    </div>
+                </div>
+
+                <!-- Tabs for different record types -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="allergies">
+                        <i class="fas fa-allergies"></i> Allergies
+                    </button>
+                    <button class="tab-btn" data-tab="conditions">
+                        <i class="fas fa-stethoscope"></i> Conditions
+                    </button>
+                    <button class="tab-btn" data-tab="medications">
+                        <i class="fas fa-pills"></i> Medications
+                    </button>
+                    <button class="tab-btn" data-tab="reports">
+                        <i class="fas fa-file-medical"></i> Reports
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Allergies Tab -->
+                    <div id="allergies" class="tab-pane active">
+                        <div class="tab-header">
+                            <h4>Allergies</h4>
+                            <button class="add-item-btn" onclick="openAddAllergyModal()">
+                                <i class="fas fa-plus"></i> Add Allergy
+                            </button>
+                        </div>
+                        <div id="allergiesList" class="items-list"></div>
+                    </div>
+
+                    <!-- Conditions Tab -->
+                    <div id="conditions" class="tab-pane">
+                        <div class="tab-header">
+                            <h4>Conditions</h4>
+                            <button class="add-item-btn" onclick="openAddConditionModal()">
+                                <i class="fas fa-plus"></i> Add Condition
+                            </button>
+                        </div>
+                        <div id="conditionsList" class="items-list"></div>
+                    </div>
+
+                    <!-- Medications Tab -->
+                    <div id="medications" class="tab-pane">
+                        <div class="tab-header">
+                            <h4>Medications</h4>
+                            <button class="add-item-btn" onclick="openAddMedicationModal()">
+                                <i class="fas fa-plus"></i> Add Medication
+                            </button>
+                        </div>
+                        <div id="medicationsList" class="items-list"></div>
+                    </div>
+
+                    <!-- Reports Tab -->
+                    <div id="reports" class="tab-pane">
+                        <div class="tab-header">
+                            <h4>Medical Reports</h4>
+                            <button class="add-item-btn" onclick="openAddReportModal()">
+                                <i class="fas fa-plus"></i> Add Report
+                            </button>
+                        </div>
+                        <div id="reportsList" class="items-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Allergy Modal -->
+    <div id="allergyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="allergyModalTitle">Add Allergy</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="allergyForm">
+                    <input type="hidden" id="allergyId">
+                    <div class="form-group">
+                        <label>Allergen: <span class="required">*</span></label>
+                        <input type="text" id="allergen" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Reaction:</label>
+                        <input type="text" id="reaction">
+                    </div>
+                    <div class="form-group">
+                        <label>Severity: <span class="required">*</span></label>
+                        <select id="severity" required>
+                            <option value="Mild">Mild</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Severe">Severe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosed Date:</label>
+                        <input type="date" id="allergyDiagnosedDate">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isActive" checked> Active
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Condition Modal -->
+    <div id="conditionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="conditionModalTitle">Add Condition</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="conditionForm">
+                    <input type="hidden" id="conditionId">
+                    <div class="form-group">
+                        <label>Condition Name: <span class="required">*</span></label>
+                        <input type="text" id="conditionName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosed Date:</label>
+                        <input type="date" id="conditionDiagnosedDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="conditionStatus">
+                            <option value="Active">Active</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Chronic">Chronic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes:</label>
+                        <textarea id="conditionNotes"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Medication Modal -->
+    <div id="medicationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="medicationModalTitle">Add Medication</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="medicationForm">
+                    <input type="hidden" id="medicationId">
+                    <div class="form-group">
+                        <label>Medication Name: <span class="required">*</span></label>
+                        <input type="text" id="medicationName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dosage:</label>
+                        <input type="text" id="dosage">
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency:</label>
+                        <input type="text" id="frequency">
+                    </div>
+                    <div class="form-group">
+                        <label>Related Condition:</label>
+                        <select id="medicationCondition">
+                            <option value="">Select a condition</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="medicationStatus">
+                            <option value="Active">Active</option>
+                            <option value="Discontinued">Discontinued</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="reportModalTitle">Add Medical Report</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    <input type="hidden" id="reportId">
+                    <div class="form-group">
+                        <label>Doctor: <span class="required">*</span></label>
+                        <select id="reportDoctor" required>
+                            <option value="">Select Doctor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Report Type: <span class="required">*</span></label>
+                        <select id="reportType" required>
+                            <option value="Consultation">Consultation</option>
+                            <option value="Follow-up">Follow-up</option>
+                            <option value="Emergency">Emergency</option>
+                            <option value="Lab Results">Lab Results</option>
+                            <option value="Imaging">Imaging</option>
+                            <option value="Surgical">Surgical</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Report Date: <span class="required">*</span></label>
+                        <input type="date" id="reportDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosis: <span class="required">*</span></label>
+                        <textarea id="diagnosis" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tests Recommended:</label>
+                        <textarea id="testsRecommended"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Treatment Plan:</label>
+                        <textarea id="treatmentPlan"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Follow-up Date:</label>
+                        <input type="date" id="followupDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes:</label>
+                        <textarea id="reportNotes"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/admin/sidebar.js"></script>
+    <script src="../../assets/js/admin/medical-records.js"></script>
+</body>
+</html>

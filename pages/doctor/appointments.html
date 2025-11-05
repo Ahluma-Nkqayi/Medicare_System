@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Appointments</title>
+
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/doctor/appointments.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+    <!-- Sidebar will be loaded dynamically by sidebar.js -->
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-number" id="todayCount">8</div>
+                <div class="stat-label">Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="weekCount">25</div>
+                <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="monthCount">102</div>
+                <div class="stat-label">This Month</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="cancelledCount">2</div>
+                <div class="stat-label">Cancelled</div>
+            </div>
+        </div>
+
+        <div class="page-title">
+            <div class="controls">
+                <div class="date-filter">
+                    <span>View:</span>
+                    <select id="viewSelect">
+                        <option value="all" selected>All</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <div id="customDateRange" class="custom-range hidden">
+                        <input type="text" id="startDate" placeholder="Start Date">
+                        <span>to</span>
+                        <input type="text" id="endDate" placeholder="End Date">
+                        <button id="applyDateRange" class="btn btn-primary">Apply</button>
+                    </div>
+                    <span>Filter:</span>
+                    <select id="filterSelect">
+                        <option value="all">All Appointments</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search patients...">
+                </div>
+                <button id="createAppointmentBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Appointment
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Upcoming Appointments Card -->
+            <div class="card appointments-card full-width-card">
+                <h3>
+                    Upcoming Appointments
+                    <span class="badge" id="appointmentCount">5</span>
+                </h3>
+                <div id="appointmentsContainer">
+                    <!-- Appointments will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Details Modal -->
+    <div id="appointmentModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Appointment Details</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="appointment-details" id="appointmentDetails">
+                <div class="no-selection">
+                    <i class="fas fa-calendar-alt"></i>
+                    <p>Select an appointment to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Appointment Modal -->
+    <div id="createAppointmentModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Appointment</h3>
+                <button class="modal-close" id="closeCreateModal">&times;</button>
+            </div>
+            <form class="appointment-form" id="createAppointmentForm">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <div class="patient-type-toggle">
+                            <button type="button" class="toggle-btn active" id="existingPatientBtn">
+                                <i class="fas fa-user"></i> Existing Patient
+                            </button>
+                            <button type="button" class="toggle-btn" id="newPatientBtn">
+                                <i class="fas fa-user-plus"></i> New Patient
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="existingPatientSection">
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="patientSelect" class="required">Select Patient</label>
+                            <select id="patientSelect">
+                                <option value="">Select a patient</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Patient Form -->
+                <div id="newPatientSection" class="hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPatientFirstName" class="required">First Name</label>
+                            <input type="text" id="newPatientFirstName" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPatientLastName" class="required">Last Name</label>
+                            <input type="text" id="newPatientLastName" placeholder="Enter last name">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPatientEmail" class="required">Email</label>
+                            <input type="email" id="newPatientEmail" placeholder="patient@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPatientPhone" class="required">Phone Number</label>
+                            <input type="tel" id="newPatientPhone" placeholder="+1 (555) 123-4567">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPatientDOB">Date of Birth</label>
+                            <input type="date" id="newPatientDOB">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPatientGender">Gender</label>
+                            <select id="newPatientGender">
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="newPatientAddress">Address</label>
+                            <input type="text" id="newPatientAddress" placeholder="Street address">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPatientEmergencyName">Emergency Contact Name</label>
+                            <input type="text" id="newPatientEmergencyName" placeholder="Contact name">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPatientEmergencyPhone">Emergency Contact Phone</label>
+                            <input type="tel" id="newPatientEmergencyPhone" placeholder="+1 (555) 123-4567">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment Details -->
+                <div class="form-section-divider"></div>
+                <h4 class="form-section-title">Appointment Details</h4>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="appointmentDate" class="required">Date</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentTime" class="required">Start Time</label>
+                        <input type="time" id="appointmentTime" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="appointmentDuration">Duration (minutes)</label>
+                        <select id="appointmentDuration">
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentStatus">Status</label>
+                        <select id="appointmentStatus">
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed" selected>Confirmed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="paymentMethod">Payment Method</label>
+                        <select id="paymentMethod">
+                            <option value="Cash">Cash</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Insurance">Insurance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="reasonForVisit" class="required">Reason for Visit</label>
+                        <textarea id="reasonForVisit" placeholder="Enter reason for visit..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelCreateBtn">Cancel</button>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-plus"></i> Create Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="toast hidden">
+        <div class="toast-content">
+            <i class="fas fa-bell"></i>
+            <div class="toast-message"></div>
+        </div>
+        <button class="toast-close">&times;</button>
+    </div>
+    
+    <script src="../../assets/js/shared/api.js"></script>
+    <script src="../../assets/js/shared/sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="../../assets/js/doctor/appointments.js"></script>
+</body>
+</html>

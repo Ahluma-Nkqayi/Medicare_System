@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Medical Records</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/patient/medical-records.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+
+    <div class="main-content">
+        <div class="records-grid">
+            <!-- Personal Information -->
+            <div class="record-section">
+                <h2><i class="fas fa-user"></i> Personal Information</h2>
+                <div class="personal-info" id="personal-info">
+                    <p style="text-align: center; padding: 20px;">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Conditions -->
+            <div class="record-section">
+                <h2><i class="fas fa-heartbeat"></i> Medical Conditions</h2>
+                <div class="conditions-list" id="conditions-list">
+                    <p style="text-align: center; padding: 20px;">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Allergies -->
+            <div class="record-section">
+                <h2><i class="fas fa-allergies"></i> Allergies</h2>
+                <div class="allergies-list" id="allergies-list">
+                    <p style="text-align: center; padding: 20px;">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Current Medications -->
+            <div class="record-section">
+                <h2><i class="fas fa-pills"></i> Current Medications</h2>
+                <div class="medications-list" id="medications-list">
+                    <p style="text-align: center; padding: 20px;">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/patient/sidebar.js"></script>
+    <script>
+        async function fetchMedicalRecords() {
+            try {
+                const response = await fetch('/api/patient/medical-records', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayPersonalInfo(data.patient);
+                    displayConditions(data.conditions);
+                    displayAllergies(data.allergies);
+                    displayMedications(data.currentMedications);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else {
+                    showError('Failed to load medical records');
+                }
+            } catch (error) {
+                console.error('Error fetching medical records:', error);
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        function displayPersonalInfo(patient) {
+            const container = document.getElementById('personal-info');
+
+            if (!patient) {
+                container.innerHTML = '<p style="text-align: center;">No information available</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <span>${patient.first_name} ${patient.last_name}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <span>${patient.email || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Phone</label>
+                    <span>${patient.phone_number || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Date of Birth</label>
+                    <span>${patient.date_of_birth ? formatDate(patient.date_of_birth) : 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Gender</label>
+                    <span>${patient.gender || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Address</label>
+                    <span>${patient.address || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Emergency Contact</label>
+                    <span>${patient.emergency_contact_name || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Emergency Phone</label>
+                    <span>${patient.emergency_contact_number || 'N/A'}</span>
+                </div>
+            `;
+        }
+
+        function displayConditions(conditions) {
+            const container = document.getElementById('conditions-list');
+
+            if (!conditions || conditions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-notes-medical"></i>
+                        <p>No medical conditions recorded</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            conditions.forEach(condition => {
+                const card = document.createElement('div');
+                card.className = 'condition-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${condition.condition_name}</h3>
+                        <span class="card-badge ${condition.status === 'Active' ? 'badge-active' : 'badge-inactive'}">
+                            ${condition.status}
+                        </span>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <label>Diagnosed Date</label>
+                            <span>${formatDate(condition.diagnosed_date)}</span>
+                        </div>
+                        ${condition.medications ? `
+                        <div class="detail-row">
+                            <label>Medications</label>
+                            <span>${condition.medications}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${condition.notes ? `
+                    <div class="notes-section">
+                        <strong>Notes:</strong>
+                        <p>${condition.notes}</p>
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function displayAllergies(allergies) {
+            const container = document.getElementById('allergies-list');
+
+            if (!allergies || allergies.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-shield-virus"></i>
+                        <p>No allergies recorded</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            allergies.forEach(allergy => {
+                const card = document.createElement('div');
+                card.className = `allergy-card allergy-severity-${allergy.severity.toLowerCase()}`;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${allergy.allergen}</h3>
+                        <span class="card-badge badge-${allergy.severity.toLowerCase()}">
+                            ${allergy.severity}
+                        </span>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <label>Reaction</label>
+                            <span>${allergy.reaction}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Diagnosed Date</label>
+                            <span>${formatDate(allergy.diagnosed_date)}</span>
+                        </div>
+                    </div>
+                    ${allergy.notes ? `
+                    <div class="notes-section">
+                        <strong>Notes:</strong>
+                        <p>${allergy.notes}</p>
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function displayMedications(medications) {
+            const container = document.getElementById('medications-list');
+
+            if (!medications || medications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-capsules"></i>
+                        <p>No current medications</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            medications.forEach(med => {
+                const card = document.createElement('div');
+                card.className = 'medication-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${med.medication_name}</h3>
+                        <span class="card-badge ${med.status === 'Active' ? 'badge-active' : 'badge-inactive'}">
+                            ${med.status}
+                        </span>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <label>Dosage</label>
+                            <span>${med.dosage}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Frequency</label>
+                            <span>${med.frequency}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Start Date</label>
+                            <span>${formatDate(med.start_date)}</span>
+                        </div>
+                    </div>
+                    ${med.notes ? `
+                    <div class="notes-section">
+                        <strong>Notes:</strong>
+                        <p>${med.notes}</p>
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+                max-width: 300px;
+            `;
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchMedicalRecords();
+        });
+    </script>
+</body>
+</html>

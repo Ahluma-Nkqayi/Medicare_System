@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - My Profile</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/patient/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+
+    <div class="main-content">
+        <div class="profile-container">
+            <div id="message-container"></div>
+
+            <!-- Personal Information Form -->
+            <div class="profile-card">
+                <h2><i class="fas fa-user"></i> Personal Information</h2>
+
+                <form id="profile-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="first-name">First Name</label>
+                            <input type="text" id="first-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last-name">Last Name</label>
+                            <input type="text" id="last-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emergency-name">Emergency Contact Name</label>
+                            <input type="text" id="emergency-name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emergency-phone">Emergency Contact Phone</label>
+                            <input type="tel" id="emergency-phone">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="loadProfile()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Form -->
+            <div class="profile-card">
+                <h2><i class="fas fa-lock"></i> Change Password</h2>
+
+                <form id="password-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm New Password</label>
+                            <input type="password" id="confirm-password" required>
+                        </div>
+                    </div>
+
+                    <div class="password-requirements">
+                        <h4>Password Requirements:</h4>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> At least 8 characters long</li>
+                            <li><i class="fas fa-check-circle"></i> Contains uppercase and lowercase letters</li>
+                            <li><i class="fas fa-check-circle"></i> Contains at least one number</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="clearPasswordForm()">Clear</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/patient/sidebar.js"></script>
+    <script>
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/patient/profile', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const profile = await response.json();
+                    populateForm(profile);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else {
+                    showError('Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        function populateForm(profile) {
+            document.getElementById('username').value = profile.username || '';
+            document.getElementById('email').value = profile.email || '';
+            document.getElementById('first-name').value = profile.first_name || '';
+            document.getElementById('last-name').value = profile.last_name || '';
+            document.getElementById('phone').value = profile.phone_number || '';
+            document.getElementById('dob').value = profile.date_of_birth ? profile.date_of_birth.split('T')[0] : '';
+            document.getElementById('gender').value = profile.gender || '';
+            document.getElementById('address').value = profile.address || '';
+            document.getElementById('emergency-name').value = profile.emergency_contact_name || '';
+            document.getElementById('emergency-phone').value = profile.emergency_contact_number || '';
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            const profileData = {
+                email: document.getElementById('email').value,
+                first_name: document.getElementById('first-name').value,
+                last_name: document.getElementById('last-name').value,
+                phone_number: document.getElementById('phone').value,
+                date_of_birth: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                address: document.getElementById('address').value,
+                emergency_contact_name: document.getElementById('emergency-name').value,
+                emergency_contact_number: document.getElementById('emergency-phone').value
+            };
+
+            try {
+                const response = await fetch('/api/patient/profile', {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(profileData)
+                });
+
+                if (response.ok) {
+                    showSuccess('Profile updated successfully');
+
+                    // Update session storage
+                    const patientInfo = {
+                        firstName: profileData.first_name,
+                        lastName: profileData.last_name,
+                        email: profileData.email
+                    };
+                    sessionStorage.setItem('patientInfo', JSON.stringify(patientInfo));
+
+                    if (window.refreshPatientSidebar) {
+                        window.refreshPatientSidebar();
+                    }
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Changes';
+            }
+        });
+
+        document.getElementById('password-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                showError('New passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showError('Password must be at least 8 characters long');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch('/api/patient/profile/password', {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                if (response.ok) {
+                    showSuccess('Password updated successfully');
+                    clearPasswordForm();
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to update password');
+                }
+            } catch (error) {
+                console.error('Error updating password:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Update Password';
+            }
+        });
+
+        function clearPasswordForm() {
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        }
+
+        function showSuccess(message) {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+            window.scrollTo(0, 0);
+        }
+
+        function showError(message) {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.innerHTML = `
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+            window.scrollTo(0, 0);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfile();
+        });
+    </script>
+</body>
+</html>

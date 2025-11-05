@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - My Appointments</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/patient/appointments.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>My Appointments</h1>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filter-date">Date</label>
+                <input type="date" id="filter-date">
+            </div>
+            <div class="filter-group">
+                <label for="filter-status">Status</label>
+                <select id="filter-status">
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="filter-group" style="justify-content: flex-end;">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+
+        <div class="appointments-container">
+            <div class="appointments-list" id="appointments-list">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Loading appointments...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/patient/sidebar.js"></script>
+    <script>
+        let allAppointments = [];
+
+        async function fetchAppointments() {
+            try {
+                const response = await fetch('/api/patient/appointments', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    allAppointments = await response.json();
+                    displayAppointments(allAppointments);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else {
+                    showError('Failed to load appointments');
+                }
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        function displayAppointments(appointments) {
+            const container = document.getElementById('appointments-list');
+
+            if (appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No appointments found</h3>
+                        <p>You don't have any appointments yet.</p>
+                        <a href="/patient/book-appointment" class="btn btn-primary" style="margin-top: 20px;">Book Your First Appointment</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            appointments.forEach(appt => {
+                const card = document.createElement('div');
+                card.className = 'appointment-card';
+                card.innerHTML = `
+                    <div class="appointment-info">
+                        <h3>${appt.doctor_name ? 'Dr. ' + appt.doctor_name : 'Doctor Not Assigned'}</h3>
+                        <p style="color: #666; margin-bottom: 15px;">${appt.specialization || 'General Practice'}</p>
+                        <div class="appointment-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>${formatDate(appt.booking_date)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>${formatTime(appt.booking_time)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-notes-medical"></i>
+                                <span>${appt.reason_for_visit}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-credit-card"></i>
+                                <span>${appt.payment_method || 'Cash'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <span class="status-badge status-${appt.status.toLowerCase()}">${appt.status}</span>
+                        ${canCancelAppointment(appt) ?
+                            `<button class="btn-cancel" onclick="cancelAppointment(${appt.booking_id})">Cancel</button>`
+                            : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function canCancelAppointment(appointment) {
+            const appointmentDate = new Date(appointment.booking_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            return appointment.status !== 'Completed' &&
+                   appointment.status !== 'Cancelled' &&
+                   appointmentDate >= today;
+        }
+
+        async function cancelAppointment(bookingId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/patient/appointments/${bookingId}/cancel`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showSuccess('Appointment cancelled successfully');
+                    fetchAppointments();
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to cancel appointment');
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                showError('Network error. Please try again.');
+            }
+        }
+
+        function applyFilters() {
+            const dateFilter = document.getElementById('filter-date').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            let filtered = allAppointments;
+
+            if (dateFilter) {
+                filtered = filtered.filter(appt => appt.booking_date === dateFilter);
+            }
+
+            if (statusFilter) {
+                filtered = filtered.filter(appt => appt.status === statusFilter);
+            }
+
+            displayAppointments(filtered);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function formatTime(timeString) {
+            if (!timeString) return '';
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+                max-width: 300px;
+            `;
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+                max-width: 300px;
+            `;
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchAppointments();
+        });
+    </script>
+</body>
+</html>

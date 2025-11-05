@@ -1,0 +1,78 @@
+/* Layout for full height with sticky footer */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f6fa; /* light medical background */
+  color: #333;
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+  text-align: center;
+}
+
+/* Footer styling */
+.footer {
+  background: #e6eff5;  /* soft light blue-grey */
+  color: #004080;       /* dark medical blue for text */
+  padding: 30px 20px 15px;
+  border-top: 2px solid #c3d7e6;
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 250px;
+  margin: 10px;
+}
+
+.footer-section h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #003366; /* slightly darker blue */
+  border-bottom: 2px solid #007acc;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.footer-section p,
+.footer-section ul,
+.footer-section li {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li a {
+  color: #004080;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer-section ul li a:hover {
+  color: #007acc; /* brighter blue on hover */
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 15px;
+  padding-top: 10px;
+  font-size: 13px;
+  color: #555;
+  border-top: 1px solid #c3d7e6;
+}

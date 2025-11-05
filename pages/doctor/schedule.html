@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Doctor Schedule</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/doctor/schedule.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="view-mode-toggle">
+                <button class="mode-btn active" id="calendarModeBtn" data-mode="calendar">
+                    <i class="fas fa-calendar"></i>
+                    <span>Calendar</span>
+                </button>
+                <button class="mode-btn" id="upcomingModeBtn" data-mode="upcoming">
+                    <i class="fas fa-list"></i>
+                    <span>Upcoming</span>
+                </button>
+            </div>
+            <div class="date-navigation">
+                <button class="date-nav-btn" id="prevDay" aria-label="Previous day">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="current-date" id="currentDate">Loading...</div>
+                <button class="date-nav-btn" id="nextDay" aria-label="Next day">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="schedule-layout">
+            <div class="schedule-sidebar">
+                <div class="card">
+                    <h3>Select Date</h3>
+                    <div class="day-selector" id="daySelector">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Quick Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">Today</div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-week"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="weekCount">0</div>
+                                <div class="stat-label">This Week</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="view-toggle-btn" id="viewToggleBtn">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>View Full Week</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="schedule-main">
+                <div class="card" id="calendarView">
+                    <div class="card-header">
+                        <h3 id="scheduleTitle">Appointments for Today</h3>
+                    </div>
+                    <div class="time-slots" id="timeSlots">
+                    </div>
+                </div>
+
+                <div class="card hidden" id="upcomingView">
+                    <div class="card-header">
+                        <h3>Upcoming Appointments</h3>
+                        <span class="card-badge" id="upcomingBadge">0</span>
+                    </div>
+                    <div class="upcoming-appointments" id="upcomingAppointments">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast hidden" id="notificationToast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle toast-icon"></i>
+            <span class="toast-message">Notification message</span>
+        </div>
+        <button class="toast-close" aria-label="Close notification">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Medical Records Modal -->
+    <div id="medicalRecordsModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-medical"></i> Medical Records</h2>
+                <div class="modal-header-actions">
+                    <button class="btn-icon-header" onclick="printMedicalRecords()" title="Print Record">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button class="btn-icon-header" onclick="downloadMedicalRecordsPDF()" title="Download PDF">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="modal-close" onclick="closeMedicalRecordsModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="modalLoadingState" class="modal-loading">
+                <div class="spinner"></div>
+                <p>Loading medical records...</p>
+            </div>
+
+            <div id="medicalRecordsContent" class="hidden">
+                <div class="card patient-info-card">
+                    <div class="patient-header">
+                        <div class="patient-avatar" id="patientAvatar">JD</div>
+                        <div class="patient-details">
+                            <h2 id="patientName">John Doe</h2>
+                            <div class="patient-meta">
+                                <span><i class="fas fa-id-card"></i> Patient ID: <strong id="patientId">-</strong></span>
+                                <span><i class="fas fa-calendar"></i> DOB: <strong id="patientDob">-</strong></span>
+                                <span><i class="fas fa-venus-mars"></i> Gender: <strong id="patientGender">-</strong></span>
+                                <span><i class="fas fa-tint"></i> Blood Type: <strong id="patientBloodType">-</strong></span>
+                            </div>
+                            <div class="patient-contact">
+                                <span><i class="fas fa-envelope"></i> <span id="patientEmail">-</span></span>
+                                <span><i class="fas fa-phone"></i> <span id="patientPhone">-</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="medical-grid">
+                    <div class="card info-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Allergies</h3>
+                            <div class="card-actions">
+                                <span class="badge" id="allergiesCount">0</span>
+                                <button class="btn-icon" onclick="openAddAllergyModal()" title="Add Allergy">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="allergiesContent">
+                            <div class="empty-message">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No known allergies</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card info-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-heartbeat"></i> Medical Conditions</h3>
+                            <div class="card-actions">
+                                <span class="badge" id="conditionsCount">0</span>
+                                <button class="btn-icon" onclick="openAddConditionModal()" title="Add Condition">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="conditionsContent">
+                            <div class="empty-message">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No medical conditions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card info-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-pills"></i> Current Medications</h3>
+                            <div class="card-actions">
+                                <span class="badge" id="medicationsCount">0</span>
+                                <button class="btn-icon" onclick="openAddMedicationModal()" title="Add Medication">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="medicationsContent">
+                            <div class="empty-message">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No current medications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card info-card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-medical-alt"></i> Medical Reports</h3>
+                        <div class="card-actions">
+                            <span class="badge" id="reportsCount">0</span>
+                            <button class="btn-icon" onclick="openCreateReportModal()" title="Create Report">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="reportsContent">
+                        <div class="empty-message">
+                            <i class="fas fa-file-medical"></i>
+                            <p>No medical reports yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Allergy Modal -->
+    <div id="allergyModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeAllergyModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2 id="allergyModalTitle"><i class="fas fa-exclamation-triangle"></i> Add Allergy</h2>
+                <button class="modal-close" onclick="closeAllergyModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="allergyForm">
+                    <input type="hidden" id="allergyId">
+                    <div class="form-group">
+                        <label>Allergen *</label>
+                        <input type="text" id="allergen" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Reaction</label>
+                        <textarea id="reaction" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Severity</label>
+                        <select id="severity" class="form-control">
+                            <option value="Mild">Mild</option>
+                            <option value="Moderate" selected>Moderate</option>
+                            <option value="Severe">Severe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosed Date</label>
+                        <input type="date" id="allergyDiagnosedDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="allergyNotes" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeAllergyModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Allergy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Condition Modal -->
+    <div id="conditionModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeConditionModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2 id="conditionModalTitle"><i class="fas fa-heartbeat"></i> Add Condition</h2>
+                <button class="modal-close" onclick="closeConditionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="conditionForm">
+                    <input type="hidden" id="conditionId">
+                    <div class="form-group">
+                        <label>Condition Name *</label>
+                        <input type="text" id="conditionName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="conditionStatus" class="form-control">
+                            <option value="Active" selected>Active</option>
+                            <option value="Managed">Managed</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="In Remission">In Remission</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosed Date</label>
+                        <input type="date" id="conditionDiagnosedDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="conditionNotes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeConditionModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Condition</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medication Modal -->
+    <div id="medicationModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeMedicationModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2 id="medicationModalTitle"><i class="fas fa-pills"></i> Add Medication</h2>
+                <button class="modal-close" onclick="closeMedicationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="medicationForm">
+                    <input type="hidden" id="medicationId">
+                    <div class="form-group">
+                        <label>Medication Name *</label>
+                        <input type="text" id="medicationName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dosage</label>
+                        <input type="text" id="dosage" class="form-control" placeholder="e.g., 10mg">
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency</label>
+                        <input type="text" id="frequency" class="form-control" placeholder="e.g., Once daily">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="startDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="medicationStatus" class="form-control">
+                            <option value="Active" selected>Active</option>
+                            <option value="Discontinued">Discontinued</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="medicationNotes" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeMedicationModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Medication</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeReportModal()"></div>
+        <div class="modal-container modal-medium">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-medical-alt"></i> Create Medical Report</h2>
+                <button class="modal-close" onclick="closeReportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    <div class="form-group">
+                        <label>Report Type *</label>
+                        <select id="reportType" class="form-control" required>
+                            <option value="">Select report type...</option>
+                            <option value="Lab Results">Lab Results</option>
+                            <option value="X-Ray">X-Ray</option>
+                            <option value="Physical Exam">Physical Exam</option>
+                            <option value="Consultation Note">Consultation Note</option>
+                            <option value="Follow-up">Follow-up</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Report Date *</label>
+                        <input type="date" id="reportDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosis</label>
+                        <textarea id="diagnosis" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Treatment Plan</label>
+                        <textarea id="treatmentPlan" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tests Recommended</label>
+                        <textarea id="testsRecommended" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Follow-up Date</label>
+                        <input type="date" id="followupDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Notes</label>
+                        <textarea id="reportNotes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeReportModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/shared/sidebar.js"></script>
+    <script src="../../assets/js/shared/api.js"></script>
+    <script src="../../assets/js/doctor/schedule.js"></script>
+</body>
+</html>

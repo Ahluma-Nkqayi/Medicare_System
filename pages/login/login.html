@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Login</title>
+
+    <link rel="stylesheet" href="/assets/css/login/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <header>Login</header>
+            <div class="logo-wrapper">
+                <div class="logo">
+                    <div class="logo-icon">M</div>
+                    <div class="logo-text">
+                        <div class="logo-main">Medicare</div>
+                        <div class="logo-sub">MEDICAL CLINIC</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="login-form">
+            <div class="user-type-tabs">
+                <div class="tab-option active" data-role="patient">
+                    <i class="fas fa-user"></i>
+                    <span>Patient</span>
+                </div>
+                <div class="tab-option" data-role="doctor">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctor</span>
+                </div>
+                <div class="tab-option" data-role="admin">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Admin</span>
+                </div>
+            </div>
+
+            <div class="form-content">
+                <div class="details">
+                    <span class="title">Login Details</span>
+                    <div class="fields">
+                        <div class="input-field full-width">
+                            <label id="login-email-label">Email Address</label>
+                            <input type="email" id="login-email" placeholder="Enter your email" required>
+                        </div>
+
+                        <div class="input-field full-width">
+                            <label>Password</label>
+                            <input type="password" id="login-password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <small id="login-help-text" class="help-text" style="display:none;">Doctors use username instead of email.</small>
+
+                    <div id="login-error" class="message error-message"></div>
+                    <div id="login-success" class="message success-message"></div>
+
+                    <button type="submit" id="login-btn" class="submit-btn">
+                        <span class="btnText">Login</span>
+                        <i class="fas fa-sign-in-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="switch-form">
+            Don't have an account? <a href="/register">Register</a>
+        </div>
+    </div>
+
+    <script src="/assets/js/login/login.js"></script>
+</body>
+</html>

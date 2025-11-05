@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediCare - Manage Your Health Records</title>
+    <link rel="stylesheet" href="../../assets/css/reports/reports.css" />
+  </head>
+  <body>
+    <!-- Edit Report Modal -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Edit Medical Report</h3>
+          <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="editForm">
+            <div class="form-group">
+              <label for="editPatientName">Patient Name:</label>
+              <input type="text" id="editPatientName" required />
+            </div>
+            <div class="form-group">
+              <label for="editReportDate">Report Date:</label>
+              <input type="date" id="editReportDate" required />
+            </div>
+            <div class="form-group">
+              <label for="editReportType">Report Type:</label>
+              <select id="editReportType" required>
+                <option value="">Select Report Type</option>
+                <option value="Blood Test Results">Blood Test Results</option>
+                <option value="X-Ray Imaging">X-Ray Imaging</option>
+                <option value="MRI Scan">MRI Scan</option>
+                <option value="CT Scan">CT Scan</option>
+                <option value="Ultrasound">Ultrasound</option>
+                <option value="ECG">ECG</option>
+                <option value="General Checkup">General Checkup</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="cancel-btn">Cancel</button>
+              <button type="submit" class="save-btn">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Report Modal -->
+    <div id="addModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add New Medical Report</h3>
+          <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="addForm">
+            <div class="form-group">
+              <label for="addPatientName">Patient Name:</label>
+              <input type="text" id="addPatientName" required />
+            </div>
+            <div class="form-group">
+              <label for="addReportDate">Report Date:</label>
+              <input type="date" id="addReportDate" required />
+            </div>
+            <div class="form-group">
+              <label for="addReportType">Report Type:</label>
+              <select id="addReportType" required>
+                <option value="">Select Report Type</option>
+                <option value="Blood Test Results">Blood Test Results</option>
+                <option value="X-Ray Imaging">X-Ray Imaging</option>
+                <option value="MRI Scan">MRI Scan</option>
+                <option value="CT Scan">CT Scan</option>
+                <option value="Ultrasound">Ultrasound</option>
+                <option value="ECG">ECG</option>
+                <option value="General Checkup">General Checkup</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="cancel-btn">Cancel</button>
+              <button type="submit" class="add-btn">Add Report</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Website Header -->
+    <header>
+      <div class="logo">
+        <h1>MediCare</h1>
+        <p>Your Health, Our Priority</p>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#" class="active">Dashboard</a></li>
+          <li><a href="#">Reports</a></li>
+          <li><a href="#">Appointments</a></li>
+          <li><a href="#">Profile</a></li>
+          <li><a href="#">Help</a></li>
+        </ul>
+      </nav>
+      <div class="user-profile">
+        <div class="user-avatar">AB</div>
+        <span>Alice Brown</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+      <h1 class="page-title">Health Records Dashboard</h1>
+      <p class="page-subtitle">
+        Manage your medical reports, track appointments, and stay on top of your
+        health journey
+      </p>
+
+      <div class="form-container">
+        <div class="dashboard-header">
+          <h2 class="dashboard-title">Medical Reports</h2>
+          <p class="dashboard-subtitle">
+            View and manage all your medical documents in one place
+          </p>
+        </div>
+
+        <div class="add-report-section">
+          <button class="add-report-btn" onclick="openAddModal()">
+            + Add New Report
+          </button>
+        </div>
+
+        <div class="reports-grid" id="reportsGrid">
+          <div class="report-card" data-id="1">
+            <div class="report-info">
+              <div class="patient-name">Alice Brown</div>
+              <div class="report-date">March 10, 2025</div>
+              <div class="report-type">Blood Test Results</div>
+            </div>
+            <div class="report-actions">
+              <button class="action-btn edit-btn" onclick="editReport(1)">
+                Edit
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteReport(1)">
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <div class="report-card" data-id="2">
+            <div class="report-info">
+              <div class="patient-name">Alice Brown</div>
+              <div class="report-date">March 23, 2025</div>
+              <div class="report-type">X-Ray Imaging</div>
+            </div>
+            <div class="report-actions">
+              <button class="action-btn edit-btn" onclick="editReport(2)">
+                Edit
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteReport(2)">
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <div class="report-card" data-id="3">
+            <div class="report-info">
+              <div class="patient-name">Alice Brown</div>
+              <div class="report-date">April 23, 2025</div>
+              <div class="report-type">MRI Scan</div>
+            </div>
+            <div class="report-actions">
+              <button class="action-btn edit-btn" onclick="editReport(3)">
+                Edit
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteReport(3)">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="save-section">
+          <button class="save-btn" onclick="saveAllChanges()">
+            Save All Changes
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Website Footer -->
+    <footer class="website-footer">
+      <div class="footer-content">
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Contact Us</a>
+          <a href="#">Support</a>
+          <a href="#">About</a>
+        </div>
+        <div class="copyright">
+          © 2025 MediCare. All rights reserved. | Secure Health Records
+          Management
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Medical reports data
+      let reports = [
+        {
+          id: 1,
+          patientName: "Alice Brown",
+          date: "2025-03-10",
+          type: "Blood Test Results",
+        },
+        {
+          id: 2,
+          patientName: "Alice Brown",
+          date: "2025-03-23",
+          type: "X-Ray Imaging",
+        },
+        {
+          id: 3,
+          patientName: "Alice Brown",
+          date: "2025-04-23",
+          type: "MRI Scan",
+        },
+      ];
+      let nextId = 4;
+      let currentEditingId = null;
+
+      // Modal functionality
+      function openAddModal() {
+        document.getElementById("addModal").style.display = "block";
+        document.getElementById("addPatientName").value = "";
+        document.getElementById("addReportDate").value = "";
+        document.getElementById("addReportType").value = "";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      function editReport(id) {
+        const report = reports.find((r) => r.id === id);
+        if (report) {
+          currentEditingId = id;
+          document.getElementById("editPatientName").value = report.patientName;
+          document.getElementById("editReportDate").value = report.date;
+          document.getElementById("editReportType").value = report.type;
+          document.getElementById("editModal").style.display = "block";
+        }
+      }
+
+      function deleteReport(id) {
+        const report = reports.find((r) => r.id === id);
+        if (
+          report &&
+          confirm(
+            `Are you sure you want to delete the ${report.type} report for ${report.patientName}?`
+          )
+        ) {
+          reports = reports.filter((r) => r.id !== id);
+          renderReports();
+          showSuccessMessage("Report deleted successfully!");
+        }
+      }
+
+      function saveAllChanges() {
+        showSuccessMessage("All changes saved successfully!");
+      }
+
+      function showSuccessMessage(message) {
+        const successDiv = document.createElement("div");
+        successDiv.className = "success-message";
+        successDiv.textContent = message;
+        document.body.appendChild(successDiv);
+
+        setTimeout(() => {
+          document.body.removeChild(successDiv);
+        }, 3000);
+      }
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      function renderReports() {
+        const grid = document.getElementById("reportsGrid");
+        grid.innerHTML = "";
+
+        reports.forEach((report, index) => {
+          const reportCard = document.createElement("div");
+          reportCard.className = "report-card";
+          reportCard.setAttribute("data-id", report.id);
+
+          reportCard.innerHTML = `
+                    <div class="report-info">
+                        <div class="patient-name">${report.patientName}</div>
+                        <div class="report-date">${formatDate(
+                          report.date
+                        )}</div>
+                        <div class="report-type">${report.type}</div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="action-btn edit-btn" onclick="editReport(${
+                          report.id
+                        })">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteReport(${
+                          report.id
+                        })">Delete</button>
+                    </div>
+                `;
+
+          grid.appendChild(reportCard);
+        });
+      }
+
+      // Event listeners
+      document.addEventListener("DOMContentLoaded", function () {
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+          const editModal = document.getElementById("editModal");
+          const addModal = document.getElementById("addModal");
+          if (event.target === editModal) {
+            closeModal("editModal");
+          }
+          if (event.target === addModal) {
+            closeModal("addModal");
+          }
+        };
+
+        // Close buttons
+        document.querySelectorAll(".close").forEach((closeBtn) => {
+          closeBtn.onclick = function () {
+            const modal = this.closest(".modal");
+            modal.style.display = "none";
+          };
+        });
+
+        // Cancel buttons
+        document.querySelectorAll(".cancel-btn").forEach((cancelBtn) => {
+          cancelBtn.onclick = function () {
+            const modal = this.closest(".modal");
+            modal.style.display = "none";
+          };
+        });
+
+        // Edit form submission
+        document.getElementById("editForm").onsubmit = function (e) {
+          e.preventDefault();
+          const patientName = document.getElementById("editPatientName").value;
+          const date = document.getElementById("editReportDate").value;
+          const type = document.getElementById("editReportType").value;
+
+          const reportIndex = reports.findIndex(
+            (r) => r.id === currentEditingId
+          );
+          if (reportIndex !== -1) {
+            reports[reportIndex] = {
+              id: currentEditingId,
+              patientName: patientName,
+              date: date,
+              type: type,
+            };
+            renderReports();
+            closeModal("editModal");
+            showSuccessMessage("Report updated successfully!");
+          }
+        };
+
+        // Add form submission
+        document.getElementById("addForm").onsubmit = function (e) {
+          e.preventDefault();
+          const patientName = document.getElementById("addPatientName").value;
+          const date = document.getElementById("addReportDate").value;
+          const type = document.getElementById("addReportType").value;
+
+          const newReport = {
+            id: nextId++,
+            patientName: patientName,
+            date: date,
+            type: type,
+          };
+
+          reports.push(newReport);
+          renderReports();
+          closeModal("addModal");
+          showSuccessMessage("Report added successfully!");
+        };
+      });
+    </script>
+  </body>
+</html>

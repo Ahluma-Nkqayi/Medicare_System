@@ -1,0 +1,60 @@
+<aside class="admin-sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <a href="/admin/bookings" class="logo">
+                <div class="logo-icon">M</div>
+                <div class="logo-text">
+                    <div class="logo-main">Medicare</div>
+                    <div class="logo-sub">MEDICAL CLINIC</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul class="nav-menu">
+            <li class="nav-item" data-page="bookings">
+                <a href="/admin/bookings">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Manage Bookings</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="users">
+                <a href="/admin/users">
+                    <i class="fas fa-users"></i>
+                    <span>Manage Users</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="medical-records">
+                <a href="/admin/medical-records">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Medical Records</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="prescriptions">
+                <a href="/admin/prescriptions">
+                    <i class="fas fa-prescription"></i>
+                    <span>Prescriptions</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <ul class="nav-menu">
+            <li class="nav-item" data-page="profile">
+                <a href="/admin/profile">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+        <button class="logout-btn" id="sidebar-logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </button>
+    </div>
+</aside>

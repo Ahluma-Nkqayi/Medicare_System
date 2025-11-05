@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare - Book Appointment</title>
+    <link rel="stylesheet" href="../../assets/css/shared/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/shared/footer.css">
+    <link rel="stylesheet" href="../../assets/css/patient/book-appointment.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Book an Appointment</h1>
+            <p>Schedule a consultation with one of our doctors</p>
+        </div>
+
+        <div class="booking-container">
+            <div id="success-container" style="display: none;">
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>Appointment Booked Successfully!</h2>
+                    <p>Your appointment has been scheduled. You will receive a confirmation shortly.</p>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="window.location.href='/patient/appointments'">View My Appointments</button>
+                        <button class="btn btn-secondary" onclick="resetForm()">Book Another</button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="booking-form" class="booking-form">
+                <!-- Step 1: Select Doctor -->
+                <div class="form-step active" id="step1">
+                    <h2>Step 1: Select a Doctor</h2>
+
+                    <div class="form-group">
+                        <label for="specialization">Filter by Specialization (Optional)</label>
+                        <select id="specialization" onchange="filterDoctors()">
+                            <option value="">All Specializations</option>
+                        </select>
+                    </div>
+
+                    <div id="doctors-container">
+                        <div class="doctors-grid" id="doctors-list">
+                            <p style="text-align: center; padding: 20px;">Loading doctors...</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="nextStep(2)" id="step1-next" disabled>Next</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Date & Time -->
+                <div class="form-step" id="step2">
+                    <h2>Step 2: Select Date & Time</h2>
+
+                    <div class="form-group">
+                        <label for="appointment-date">Select Date</label>
+                        <input type="date" id="appointment-date" required onchange="loadAvailableSlots()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Available Time Slots</label>
+                        <div class="time-slots" id="time-slots">
+                            <p style="text-align: center; padding: 20px;">Please select a date first</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(1)">Back</button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)" id="step2-next" disabled>Next</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Appointment Details -->
+                <div class="form-step" id="step3">
+                    <h2>Step 3: Appointment Details</h2>
+
+                    <div class="form-group">
+                        <label for="reason">Reason for Visit *</label>
+                        <textarea id="reason" required placeholder="Please describe your symptoms or reason for visit..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment-method">Payment Method</label>
+                        <select id="payment-method">
+                            <option value="Cash">Cash</option>
+                            <option value="Insurance">Insurance</option>
+                            <option value="Credit Card">Credit Card</option>
+                        </select>
+                    </div>
+
+                    <div class="review-section">
+                        <h3>Review Your Appointment</h3>
+                        <div class="review-item">
+                            <strong>Doctor:</strong>
+                            <span id="review-doctor">-</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Date:</strong>
+                            <span id="review-date">-</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Time:</strong>
+                            <span id="review-time">-</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Payment:</strong>
+                            <span id="review-payment">Cash</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">Back</button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Book Appointment</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../assets/js/patient/sidebar.js"></script>
+    <script>
+        let allDoctors = [];
+        let selectedDoctor = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        let bookedSlots = [];
+
+        async function fetchDoctors() {
+            try {
+                const response = await fetch('/api/patient/doctors', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    allDoctors = await response.json();
+                    populateSpecializations();
+                    displayDoctors(allDoctors);
+                } else if (response.status === 401) {
+                    window.location.href = '/login';
+                } else {
+                    showError('Failed to load doctors');
+                }
+            } catch (error) {
+                console.error('Error fetching doctors:', error);
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        function populateSpecializations() {
+            const select = document.getElementById('specialization');
+            const specializations = [...new Set(allDoctors.map(d => d.specialization).filter(s => s))];
+
+            specializations.forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                select.appendChild(option);
+            });
+        }
+
+        function filterDoctors() {
+            const spec = document.getElementById('specialization').value;
+            const filtered = spec ? allDoctors.filter(d => d.specialization === spec) : allDoctors;
+            displayDoctors(filtered);
+        }
+
+        function displayDoctors(doctors) {
+            const container = document.getElementById('doctors-list');
+
+            if (doctors.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px;">No doctors found</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            doctors.forEach(doctor => {
+                const card = document.createElement('div');
+                card.className = 'doctor-card';
+                if (selectedDoctor && selectedDoctor.doctor_id === doctor.doctor_id) {
+                    card.classList.add('selected');
+                }
+                card.onclick = () => selectDoctor(doctor, card);
+                card.innerHTML = `
+                    <h4>Dr. ${doctor.first_name} ${doctor.last_name}</h4>
+                    <p>${doctor.specialization || 'General Practice'}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectDoctor(doctor, cardElement) {
+            document.querySelectorAll('.doctor-card').forEach(c => c.classList.remove('selected'));
+            cardElement.classList.add('selected');
+            selectedDoctor = doctor;
+            document.getElementById('step1-next').disabled = false;
+            document.getElementById('review-doctor').textContent = `Dr. ${doctor.first_name} ${doctor.last_name}`;
+        }
+
+        async function loadAvailableSlots() {
+            const dateInput = document.getElementById('appointment-date');
+            const date = dateInput.value;
+
+            if (!date || !selectedDoctor) {
+                return;
+            }
+
+            selectedDate = date;
+            document.getElementById('review-date').textContent = formatDate(date);
+
+            try {
+                const response = await fetch(`/api/patient/doctors/${selectedDoctor.doctor_id}/availability?date=${date}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    bookedSlots = data.bookedSlots || [];
+                    displayTimeSlots();
+                } else {
+                    showError('Failed to load available slots');
+                }
+            } catch (error) {
+                console.error('Error loading slots:', error);
+                showError('Network error. Please try again.');
+            }
+        }
+
+        function displayTimeSlots() {
+            const container = document.getElementById('time-slots');
+            container.innerHTML = '';
+
+            const slots = generateTimeSlots();
+
+            slots.forEach(slot => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'time-slot';
+
+                const isBooked = bookedSlots.includes(slot);
+
+                if (isBooked) {
+                    slotDiv.classList.add('booked');
+                    slotDiv.textContent = slot;
+                } else {
+                    if (selectedTime === slot) {
+                        slotDiv.classList.add('selected');
+                    }
+                    slotDiv.textContent = slot;
+                    slotDiv.onclick = () => selectTimeSlot(slot, slotDiv);
+                }
+
+                container.appendChild(slotDiv);
+            });
+        }
+
+        function generateTimeSlots() {
+            const slots = [];
+            for (let hour = 9; hour < 17; hour++) {
+                slots.push(`${String(hour).padStart(2, '0')}:00:00`);
+                slots.push(`${String(hour).padStart(2, '0')}:30:00`);
+            }
+            return slots;
+        }
+
+        function selectTimeSlot(time, slotElement) {
+            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            slotElement.classList.add('selected');
+            selectedTime = time;
+            document.getElementById('step2-next').disabled = false;
+            document.getElementById('review-time').textContent = formatTime(time);
+        }
+
+        function nextStep(step) {
+            if (step === 2) {
+                if (!selectedDoctor) {
+                    showError('Please select a doctor');
+                    return;
+                }
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('appointment-date').min = today;
+            }
+
+            if (step === 3) {
+                if (!selectedDate || !selectedTime) {
+                    showError('Please select date and time');
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+        }
+
+        function prevStep(step) {
+            document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+        }
+
+        document.getElementById('payment-method').addEventListener('change', function() {
+            document.getElementById('review-payment').textContent = this.value;
+        });
+
+        document.getElementById('booking-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const reason = document.getElementById('reason').value;
+            const paymentMethod = document.getElementById('payment-method').value;
+
+            if (!selectedDoctor || !selectedDate || !selectedTime || !reason) {
+                showError('Please fill all required fields');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Booking...';
+
+            try {
+                const response = await fetch('/api/patient/appointments', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        doctor_id: selectedDoctor.doctor_id,
+                        booking_date: selectedDate,
+                        booking_time: selectedTime,
+                        reason_for_visit: reason,
+                        payment_method: paymentMethod
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('booking-form').style.display = 'none';
+                    document.getElementById('success-container').style.display = 'block';
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to book appointment');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Book Appointment';
+                }
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+                showError('Network error. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Book Appointment';
+            }
+        });
+
+        function resetForm() {
+            selectedDoctor = null;
+            selectedDate = null;
+            selectedTime = null;
+            document.getElementById('booking-form').reset();
+            document.getElementById('booking-form').style.display = 'block';
+            document.getElementById('success-container').style.display = 'none';
+            nextStep(1);
+            fetchDoctors();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function formatTime(timeString) {
+            if (!timeString) return '';
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-error';
+            errorDiv.textContent = message;
+
+            const firstStep = document.querySelector('.form-step.active');
+            firstStep.insertBefore(errorDiv, firstStep.firstChild);
+
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchDoctors();
+        });
+    </script>
+</body>
+</html>
