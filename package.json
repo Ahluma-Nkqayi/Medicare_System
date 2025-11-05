@@ -1,0 +1,27 @@
+{
+  "name": "medicare-booking-system",
+  "version": "1.0.0",
+  "description": "Medical appointment booking system with patient, doctor, and admin portals",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "cd backend && nodemon server.js",
+    "start": "cd backend && node server.js",
+    "install-backend": "cd backend && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "medical",
+    "booking",
+    "healthcare",
+    "appointments"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
